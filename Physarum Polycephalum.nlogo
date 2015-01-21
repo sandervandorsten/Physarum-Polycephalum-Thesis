@@ -1,10 +1,7 @@
 globals [ 
-  ; Jeff Jones'-variables
-  dampT 
-  sensor-offset
+  ; Jeff Jones'-variables 
   depT 
-  SS step-size 
-  evaporation-rate
+  SS
   
   mortality-rate
   
@@ -12,7 +9,7 @@ globals [
   ants-visible? food-visible? pheromone-visible? recording-movie? 
 
   ; additional variables for a good workflow
-  country not-country soft-land
+  country border terrain
   close-movie-at-tick
   color-scale
   date-time
@@ -77,13 +74,9 @@ to set-global-variables
   ;sMin      Sensitivity threshold                                     0
   
  ; ------------------------------------------------------------------------------------- ;
-  set SS 1
-  set sensor-offset SO * patch-size
-  set step-size SS * patch-size
+  set SS 2
   set depT 5
-  set dampT 0.1
 
-  set evaporation-rate   0.9
   
   ;additional settings
   set ants-visible?      true
@@ -96,19 +89,19 @@ to set-global-variables
   set time word substring date-and-time 0 8 substring date-and-time 12 15
   set time replace-item 2 time ";"
   set time replace-item 5 time ";"
-  set export-prefix (word "/recordings3/" food-scenario " - " border-type " - " land-type " - " time)
+  set export-prefix (word "/recordings/" food-scenario  " - " ant-deployment" - " land-type " - " time)
 end
 
 to make-land
   if (not keep-land) [
     ifelse (land-type = "import land from CSV") [
       set country patches with [pcolor = violet] 
-      set not-country patches with [ pcolor = violet]
-      set soft-land patches with [ pcolor = violet]    ;little trick to tell the variable it's an agentset
+      set border patches with [ pcolor = violet]
+      set terrain patches with [ pcolor = violet]    ;little trick to tell the variable it's an agentset
       user-message "you can now select an earlier exported CSV file"
       file-open user-file
       
-      user-message "file will be imported. this may take up to 2 minutes, please hang in there"
+      user-message "file will be imported. this may take up to 2 minutes."
       let read-line get-coords 
       while [(first read-line != "#") ][
         ask patch first read-line last read-line [
@@ -154,19 +147,19 @@ end
 to set-border
   if (border-type = "No border") [
     set country patches
-    set not-country patches with [ pcolor = violet]
-    set soft-land patches with [ pcolor = violet]    ;little trick to tell the variable it's an agentset
+    set border patches with [ pcolor = violet]
+    set terrain patches with [ pcolor = violet]    ;little trick to tell the variable it's an agentset
   ]
       
   if (border-type = "Circle") [
     set country patches with     [ distancexy 0 0 <= max-pycor ]
-    set not-country patches with [ distancexy 0 0 > max-pycor  ]
-    set soft-land patches with   [ pcolor = violet ]
+    set border patches with [ distancexy 0 0 > max-pycor  ]
+    set terrain patches with   [ pcolor = violet ]
   ]
   if (border-type = "No corners") [
     set country patches with     [ distancexy 0 0 <= (sqrt ((max-pxcor * max-pxcor) + (max-pycor * max-pycor) ) - (max-pxcor / 6)) ]
-    set not-country patches with [ distancexy 0 0 > (sqrt ((max-pxcor * max-pxcor) + (max-pycor * max-pycor) ) - (max-pxcor / 6))  ]
-    set soft-land patches with [ pcolor = violet ]
+    set border patches with [ distancexy 0 0 > (sqrt ((max-pxcor * max-pxcor) + (max-pycor * max-pycor) ) - (max-pxcor / 6))  ]
+    set terrain patches with [ pcolor = violet ]
   ]
 end
 
@@ -181,7 +174,7 @@ to set-land
   if (land-type = "Center mountain") [
     ask patch 0 0 [
       ask patches in-radius object-size [
-        set pcolor 5
+        set pcolor 2
       ]
     ]
     import-color
@@ -193,13 +186,13 @@ to set-land-variables
     set evap-rate evaporation-rate
     set patch-type 0
   ]
-  ask not-country [
+  ask border [
     set pcolor 3
     set pheromone -1
     set evap-rate 0
     set patch-type 1
     ]
-  ask soft-land [ 
+  ask terrain [ 
     set pcolor blue
     set evap-rate evaporation-rate * wAcc
     set patch-type 2
@@ -208,7 +201,7 @@ to set-land-variables
 end
 
 to add-food [ f-scenario ]
-  let axis-size 70
+  let axis-size 100
   if (f-scenario = "steiner triangle") [ 
     create-food 3 [
       give-food-attributes
@@ -226,24 +219,28 @@ to add-food [ f-scenario ]
   if (f-scenario = "steiner rectangle") [
     create-food 6 [
       give-food-attributes
-      if who = 0 [
-        left 60
+      if who = 0 or who = 1 or who = 2 [
+        fd axis-size / 2
+      ]
+      if who = 1 [
+        left 90
         fd axis-size
       ]
-      if who = 3 [
-        left 120
+      if who = 2 [
+        right 90
         fd axis-size
       ]
-      if who = 1 or who = 2 [
-        right 60 * who
-        fd axis-size
+      if who = 3 or who = 4 or who = 5 [
+        set heading 180
+        fd axis-size / 2
       ]
       if who = 4 [
-        fd (cos 60 * axis-size)
+        left 90
+        fd axis-size
       ]
-      if who = 5 [ 
-        left 180
-        fd (cos 60 * axis-size)
+      if who = 5 [
+        right 90
+        fd axis-size
       ]
     ]
   ]
@@ -265,22 +262,22 @@ to add-food [ f-scenario ]
   ;insert food scenarios here ---------------------------------------
   
   if (f-scenario = "scenario 1") [ 
-    create-food 1 [ give-food-attributes setxy -58 41 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 47 -39 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -75 7 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -17 27 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -2 96 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 96 49 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -100 39 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 23 -70 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 78 73 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -27 65 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 51 45 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -12 -13 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 71 -66 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 25 -7 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 17 28 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -54 93 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 56 -47 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -2 115 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 28 -84 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -70 49 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 20 34 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 94 88 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -120 47 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 109 39 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 30 -8 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 85 -79 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -66 111 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 61 54 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -14 -16 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -32 78 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -90 8 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -20 32 set my-size 8 set size my-size ]
   ]
   if (f-scenario = "scenario 2") [ 
     create-food 1 [ give-food-attributes setxy -29 19 ]
@@ -291,24 +288,56 @@ to add-food [ f-scenario ]
     create-food 1 [ give-food-attributes setxy 68 37 ]
     create-food 1 [ give-food-attributes setxy -78 -60 ]
   ]
+  if (f-scenario = "scenario 0") [ 
+    create-food 1 [ give-food-attributes setxy -100 0 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 100 0 set my-size 8 set size my-size ]
+  ]
   if (f-scenario = "the Netherlands") [ 
-    create-food 1 [ give-food-attributes setxy -13 -3 set my-size 9 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 25 -32 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -36 70 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
     create-food 1 [ give-food-attributes setxy -104 -54 set my-size 7 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -58 -26 set my-size 10 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 43 8 set my-size 8 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 96 14 set my-size 8 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -6 -50 set my-size 7 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -33 23 set my-size 14 set size my-size ]
     create-food 1 [ give-food-attributes setxy -72 -5 set my-size 11 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 85 59 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -33 23 set my-size 14 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -3 -44 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -60 -25 set my-size 10 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 27 -19 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -13 -3 set my-size 9 set size my-size ]
     create-food 1 [ give-food-attributes setxy 32 106 set my-size 9 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 48 42 set my-size 8 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -28 72 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 48 8 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 80 112 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 63 58 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 0 31 set my-size 10 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 93 6 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -65 -50 set my-size 6 set size my-size ]
+  ]
+  if (f-scenario = "the Netherlands 10 largest cities") [ 
+    create-food 1 [ give-food-attributes setxy -33 23 set my-size 14 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -42 -47 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -72 -5 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 80 112 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -58 -26 set my-size 10 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -13 -3 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -22 -49 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 0 -63 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -2 30 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 25 -32 set my-size 9 set size my-size ]
+  ]
+  if (f-scenario = "the Netherlands province capitals") [ 
+    create-food 1 [ give-food-attributes setxy -3 -44 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 12 45 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 27 -19 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 32 106 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -104 -54 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -45 24 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 80 87 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -72 -5 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -13 -3 set my-size 9 set size my-size ]
     create-food 1 [ give-food-attributes setxy 29 -133 set my-size 9 set size my-size ]
     create-food 1 [ give-food-attributes setxy 80 112 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 48 42 set my-size 8 set size my-size ]
   ]
   if (f-scenario = "England") [ 
     create-food 1 [ give-food-attributes setxy 2 74 set my-size 9 set size my-size ]
@@ -321,6 +350,46 @@ to add-food [ f-scenario ]
     create-food 1 [ give-food-attributes setxy 17 -40 set my-size 8 set size my-size ]
     create-food 1 [ give-food-attributes setxy 7 -15 set my-size 8 set size my-size ]
     create-food 1 [ give-food-attributes setxy -98 125 set my-size 7 set size my-size ]
+  ]
+  if (f-scenario = "Armenia") [ 
+    create-food 1 [ give-food-attributes setxy -45 -6 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -18 -68 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 114 -24 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 61 -41 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -76 -30 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -102 56 set my-size 10 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -8 31 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 60 -92 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 146 -120 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 32 -6 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -27 -31 set my-size 18 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -33 57 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 36 79 set my-size 6 set size my-size ]
+  ]
+  if (f-scenario = "Armenia 10 largest cities") [ 
+    create-food 1 [ give-food-attributes setxy 32 -6 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -8 31 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -18 -68 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -33 57 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -27 -31 set my-size 18 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -76 -30 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -53 -29 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -17 -6 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -102 56 set my-size 10 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 145 -115 set my-size 6 set size my-size ]
+  ]
+  if (f-scenario = "Armenia province capitals") [ 
+    create-food 1 [ give-food-attributes setxy -8 31 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 60 -92 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 36 79 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -18 -68 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -102 56 set my-size 10 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 146 -120 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -76 -30 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -33 57 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 32 -6 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -27 -31 set my-size 18 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -45 -6 set my-size 6 set size my-size ]
   ]
   if (f-scenario = "Zeeland") [ 
     create-food 1 [ give-food-attributes setxy -33 -23 set my-size 5 set size my-size ]
@@ -352,6 +421,42 @@ to add-food [ f-scenario ]
     create-food 1 [ give-food-attributes setxy 75 71 set my-size 5 set size my-size ]
     create-food 1 [ give-food-attributes setxy 58 130 set my-size 6 set size my-size ]
   ]
+  if (f-scenario = "Zeeland 10 largest cities") [ 
+    create-food 1 [ give-food-attributes setxy -74 -4 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 139 127 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 88 -24 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 91 26 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -84 -25 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 69 125 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -8 -9 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 100 144 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -15 -82 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 130 -3 set my-size 12 set size my-size ]
+  ]
+  if (f-scenario = "Zeeland province capitals") [ 
+    create-food 1 [ give-food-attributes setxy 12 -11 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -15 -82 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 100 144 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -42 26 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -8 -9 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 135 89 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 98 28 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -97 -54 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -74 -4 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 32 -27 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 61 94 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -28 -20 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 139 127 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 88 -24 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 130 -3 set my-size 12 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 2 51 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -84 -25 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 39 -93 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 78 10 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 116 111 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -110 15 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 70 131 set my-size 6 set size my-size ]
+  ]
   ;------------------------------------------------------------------
   ask food [ 
     ask country in-radius (0.5 * my-size) [
@@ -380,7 +485,7 @@ end
 to add-ants [ dens ]
   let nAnts (max-pxcor * 2 * max-pycor * 2) *  (dens / 100)
   if (ant-deployment = "filamentous condensation") [
-    ask n-of nAnts patches with [distancexy 0 0 <= max-pycor] [ 
+    ask n-of nAnts country [ 
       sprout-ants 1 [
         give-ant-attributes
         set heading random 360
@@ -402,7 +507,7 @@ to add-ants [ dens ]
     ]
   ] 
   if (ant-deployment = "plasmodial shrinkage") [
-    set mortality-rate 0.0005
+    set mortality-rate 0.00025
     set nAnts (max-pxcor * 2 * max-pycor * 2) * 0.5
     ask n-of nAnts patches with [distancexy 0 0 <= max-pycor] [
       sprout-ants 1 [ 
@@ -433,29 +538,29 @@ end
 to sense 
   ; what if sensor is over the edge of the game?
   ; decision: the ant wont sense anything with that sensor
-  let patch-front patch-ahead sensor-offset
-  let patch-left patch-left-and-ahead  SA sensor-offset
-  let patch-right patch-right-and-ahead SA sensor-offset
+  let patch-front patch-ahead SO
+  let patch-left patch-left-and-ahead  SA SO
+  let patch-right patch-right-and-ahead SA SO
   
   if patch-front != nobody [
     let pher-patch-front [ pheromone ] of patch-front 
-    if pher-patch-front > sMin or pher-patch-front != -1 [
+    if pher-patch-front > sMin and pher-patch-front != -1 [
       set FF pher-patch-front
     ]
   ]
   if patch-left  != nobody [
     let pher-patch-left [ pheromone ] of patch-left 
-    if pher-patch-left > sMin  or pher-patch-left != -1 [
+    if pher-patch-left > sMin  and pher-patch-left != -1 [
       set FL pher-patch-left
     ]
   ]
   if patch-right != nobody [
     let pher-patch-right [ pheromone ] of patch-right
-    if pher-patch-right > sMin or pher-patch-right != -1 [
+    if pher-patch-right > sMin and pher-patch-right != -1 [
       set FR pher-patch-right
     ]
   ]
-  
+  if FF < 0 and FL < 0 and FR < 0 [ set heading random 360 stop]
   if FF > FL and FF > FR [ stop ]
   if FL < FR [ right RA stop ]
   if FR < FL [ left  RA stop ]
@@ -463,39 +568,43 @@ end
 
 to move
   ;move forward, if not occupied
-  if ([patch-type] of patch-here = 1) [
+  ifelse ([patch-type] of patch-here = 1) [
     let random-patch one-of country
     facexy ([pxcor] of random-patch) ([pycor] of random-patch)
-    fd step-size
-  ]
-  
-  if-else (patch-ahead step-size != nobody and not any? ants-on patch-ahead step-size and [ patch-type ] of patch-ahead step-size != 1 )[
-    set color green
-    fd step-size
-    ;if move is succesful, drop pheromone
-    set pheromone pheromone + depT
-  ] [
+    fd SS
+  ] 
+  [
+    if-else (patch-ahead SS != nobody and not any? ants-on patch-ahead SS and [ patch-type ] of patch-ahead SS != 1 )[
+      set color green
+      fd SS
+      ;if move is succesful, drop pheromone
+      set pheromone pheromone + depT
+    ] [
     set color orange
     ; if an ant isn't able to move, change his orientation randomly
     set heading random-float 360
+    ]
   ]
 end
 
 to update-environment
   ;let the pheromone diffuse. then evaporate 
   diffuse pheromone dampT
-  ask not-country [ 
+  ask border [ 
      set pheromone -1
      set pcolor 3 
   ] 
   ask country [
+    set evap-rate evaporation-rate
     set pheromone pheromone * evap-rate
-    if pheromone-visible? [ set pcolor scale-color yellow pheromone 0 color-scale ] 
+    if pheromone-visible? [ set pcolor scale-color yellow pheromone 0 color-scale ]
+    
   ]
-  ask soft-land [
+  ask terrain [
     set evap-rate evaporation-rate * wAcc
     set pheromone pheromone * evap-rate
     set pcolor blue 
+    if pheromone > 1 and pheromone-visible? [ set pcolor 2 + scale-color yellow pheromone 0 color-scale ]
   ]
   ask food [ 
     ask patches in-radius (0.5 * my-size) with [patch-type = 0][
@@ -577,18 +686,18 @@ to draw-hard-border
 end
 
 to become-country
-  set not-country not-country with [self != myself]
-  set soft-land soft-land with [self != myself]
+  set border border with [self != myself]
+  set terrain terrain with [self != myself]
   set country (patch-set country self)
   set pcolor black
   set pheromone 0
   set patch-type 0
 end
 
-to become-not-country
+to become-border
   set country country with [self != myself]
-  set soft-land soft-land with [self != myself]
-  set not-country (patch-set not-country self)
+  set terrain terrain with [self != myself]
+  set border (patch-set border self)
   set pcolor 3
   set pheromone -1
   set patch-type 1
@@ -596,8 +705,8 @@ end
 
 to become-terrain
   set country country with [self != myself]
-  set not-country not-country with [self != myself]
-  set soft-land (patch-set soft-land self)
+  set border border with [self != myself]
+  set terrain (patch-set terrain self)
   set pcolor blue
   set evap-rate evaporation-rate * wAcc
   set patch-type 2
@@ -609,29 +718,29 @@ to-report moore-offsets [n]
 end
 
 to import-color 
-  let N-not-country patches with [pcolor = 2]
+  let N-border patches with [pcolor = 2]
   let N-country     patches with [pcolor = 5]
-  let N-soft-land patches with [pcolor = (blue - 1) ]
-  set not-country (patch-set not-country N-not-country)
-  set country country with [not member? self N-not-country]
-  set soft-land soft-land with [not member? self N-not-country]
-  ask N-not-country [
+  let N-terrain patches with [pcolor = (blue - 1) ]
+  set border (patch-set border N-border)
+  set country country with [not member? self N-border]
+  set terrain terrain with [not member? self N-border]
+  ask N-border [
     set pcolor 3
     set pheromone -1
     set patch-type 1
   ]
   set country (patch-set country N-country)
-  set not-country not-country with [not member? self N-country]
-  set soft-land soft-land with [not member? self N-country]
+  set border border with [not member? self N-country]
+  set terrain terrain with [not member? self N-country]
   ask N-country [
     set pcolor black
     set pheromone 0
     set patch-type 0
   ]
-  set soft-land (patch-set soft-land N-soft-land)
-  set not-country not-country with [not member? self N-soft-land]
-  set country country with [not member? self N-soft-land]
-  ask N-soft-land [
+  set terrain (patch-set terrain N-terrain)
+  set border border with [not member? self N-terrain]
+  set country country with [not member? self N-terrain]
+  ask N-terrain [
     set pcolor blue
     set evap-rate evaporation-rate * wAcc
     set patch-type 2
@@ -684,15 +793,15 @@ to set-scenario
 end
 
 to save-land
-  file-open (word "/land-scenarios/zeeland2.csv")
+  file-open (word "/land-scenarios/hoi - " time ".csv")
   ask country     [ file-print (word pxcor "," pycor) ]
   file-print "#,#"
-  ask not-country [ file-print (word pxcor "," pycor) ]
+  ask border [ file-print (word pxcor "," pycor) ]
   file-print "$,$"
-  ask soft-land   [ file-print (word pxcor "," pycor) ]
+  ask terrain   [ file-print (word pxcor "," pycor) ]
   file-print "@,@"
   file-close
-  user-message "file saved as .csv file. You can import this file as 'border-type: import from CSV'"
+  user-message "file saved as .csv file. You can import this file by selecting 'land-type: import from CSV'"
 end
 
 to save-food
@@ -713,63 +822,18 @@ to toggle-food
 end
 
 to toggle-pheromone
-  if pheromone-visible? [ ask country [ set pcolor black ] ]  set pheromone-visible? not pheromone-visible?
+  if pheromone-visible? [ ask country [ set pcolor black ] ask terrain [ set pcolor blue ] ]  set pheromone-visible? not pheromone-visible?
 end
-
-to print-parameters
-  file-open (word export-prefix ".csv")
-  file-print word "density," density 
-  file-print word "diffK," 3
-  file-print word "dampT," dampT
-  file-print word "wProj," wProj
-  file-print word "SA," SA
-  file-print word "RA," RA
-  file-print word "SO," sensor-offset
-  file-print word "SS," 1
-  file-print word "depT," depT
-  file-print word "sMin," sMin                 
-  file-print word "food-size," food-size
-  file-print word "evaporation-rate," evaporation-rate
-  file-print word "food-scenario," food-scenario
-  file-print word "ant-deployment," ant-deployment
-  file-print word "mortality-rate," mortality-rate
-  file-close
-end 
 
 to print-screen
   export-interface (word export-prefix ".png")
 end
 
-to import-parameters
-  __clear-all-and-reset-ticks
-  clear-output
-  set-global-variables
-  set-border
-  user-message "import an earlier exported .csv file"
-  file-open user-file
-  let x file-read-line ; delete the first line
-  let parameter ""
-  let parameter-value 0
-  print "\n...importing parameters..."
-  while [not file-at-end?] [
-    set x file-read-line
-    set parameter (substring x 0 position "," x)
-    set parameter-value substring x (position "," x + 1) length x
-    print (word parameter " " parameter-value)
-    set parameter parameter-value
-    ;run en runresult bekijken, run (word " set " parameter " value")
-  ]
-  add-food food-scenario
-  show density
-  show RA
-  add-ants density
-  file-close
-  print "parameters successfully imported! (not really yet because it's not working)"
-end
-
 to toggle-record-movie
-  if not recording-movie? [reset-ticks]
   if-else not recording-movie? [
+    reset-ticks
+    set ants-visible? true
+    toggle-ants
     set recording-movie? true
     set close-movie-at-tick 60 * duration-in-minutes * frames-per-second
     movie-start (word export-prefix ".mov")
@@ -780,7 +844,6 @@ to toggle-record-movie
     if-else user-yes-or-no? "Do you want to save this movie and it's parameters?"
     [
       movie-close
-      print-parameters
       print-screen
       set recording-movie? false
       stop
@@ -793,9 +856,9 @@ to toggle-record-movie
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-235
+245
 10
-847
+857
 643
 150
 150
@@ -828,7 +891,7 @@ density
 density
 0
 20
-0
+3
 1
 1
 %
@@ -850,27 +913,27 @@ TEXTBOX
 10
 1546
 276
-Standard values for parameters\n-----------------------------------------------------------------------------\ndensity\ndampT\n\nwProj\nSA\n\nRA\nSO\nSW\nSS\ndepT\n\nsMin
+                        Typical values for parameters\n-----------------------------------------------------------------------------\ndensity\nSA\nRA\nSO\ndepT\nsMin\nSW\nSS\nwProj\nwAcc\ndampT\nevap-rate
 11
 0.0
 1
 
 TEXTBOX
-1291
-39
-1461
-325
-Population density\nChemoattractant diffusion damping factor\n'Food' stimulus projection weight\nFL and FR Sensor angle from forward position\nAgent rotation angle\nSensor offset distance\nSensor width\nStep size - distance per move\nChemoattractant deposition per step\nSensitivity threshold
+1295
+40
+1505
+326
+Population as percentage of grid size\nSensory angle of the agent\nRotation angle of the agent\nSensory offset distance\nChemoattractant deposition per step\nSensitivity threshold of sensors\nSensory width\nStep size\nFood stimulus projection weight\nTerrain permeability projection weight\nChemoattractant diffusion damping factor\nChemoattractant evaporation rate 
 11
 0.0
 1
 
 TEXTBOX
-1474
-38
-1624
-369
-1-5%\n0.1\n\n0.5-50\n25 - 70 degrees\n\n25 - 70 degrees\n5-20 patches\n1 patch\n1 patch per step\n5\n\n(1.0E-8) - (1.0E-5) or 0
+1505
+40
+1655
+371
+1-5%\n25-70\n25-70\n5-20\n5\n1,e-6 – 1,e-9 or 0\n1 patch\n1 patch\n0.5 - 50\n0.3 - 0.5\n0.3\n0.9\n
 11
 0.0
 1
@@ -884,7 +947,7 @@ SA
 SA
 0
 90
-50
+65
 5
 1
 Degrees
@@ -914,7 +977,7 @@ SO
 SO
 5
 30
-6
+11
 1
 1
 patches
@@ -973,13 +1036,13 @@ NIL
 
 CHOOSER
 5
-435
-175
-480
+430
+237
+475
 food-scenario
 food-scenario
-"steiner triangle" "steiner square" "steiner rectangle" "place food random" "scenario 1" "scenario 2" "the Netherlands" "England" "Zeeland"
-3
+"steiner triangle" "steiner square" "steiner rectangle" "place food random" "scenario 1" "scenario 2" "scenario 0" "England" "---------------------" "the Netherlands" "the Netherlands 10 largest cities" "the Netherlands province capitals" "Armenia" "Armenia 10 largest cities" "Armenia province capitals" "Zeeland" "Zeeland 10 largest cities" "Zeeland province capitals"
+17
 
 SLIDER
 900
@@ -990,7 +1053,7 @@ food-size
 food-size
 1
 25
-8
+6
 1
 1
 patches
@@ -1016,7 +1079,7 @@ NIL
 CHOOSER
 5
 490
-142
+135
 535
 border-type
 border-type
@@ -1032,7 +1095,7 @@ duration-in-minutes
 duration-in-minutes
 0
 5
-2
+3.2
 0.1
 1
 minutes
@@ -1047,7 +1110,7 @@ frames-per-second
 frames-per-second
 0
 150
-40
+60
 10
 1
 fps
@@ -1080,17 +1143,6 @@ recording-movie?
 17
 1
 11
-
-INPUTBOX
-180
-430
-230
-490
-nFood-if-random
-0
-1
-0
-Number
 
 CHOOSER
 5
@@ -1138,8 +1190,8 @@ SLIDER
 pencil-size
 pencil-size
 1
-150
-52
+100
+8
 1
 1
 NIL
@@ -1305,7 +1357,7 @@ SWITCH
 583
 keep-land
 keep-land
-1
+0
 1
 -1000
 
@@ -1372,8 +1424,8 @@ CHOOSER
 420
 wProj
 wProj
-0.0050 0.05 0.5 1 2 5 50
-5
+0.0050 0.05 0.5 1 2 5 10 50
+3
 
 CHOOSER
 115
@@ -1383,7 +1435,7 @@ CHOOSER
 sMin
 sMin
 0 0.1 0.0010 1.0E-4 1.0E-5 1.0E-6 1.0E-7 1.0E-8 1.0E-9
-5
+0
 
 TEXTBOX
 5
@@ -1409,7 +1461,7 @@ TEXTBOX
 1265
 495
 1545
-551
+520
                          RECORDING TOOLS\n-------------------------------------------------------------
 11
 0.0
@@ -1427,9 +1479,9 @@ TEXTBOX
 
 TEXTBOX
 10
-340
+295
 230
-365
+320
               ENVIRONMENT PROPERTIES\n------------------------------------------------------
 11
 0.0
@@ -1447,7 +1499,7 @@ NIL
 T
 OBSERVER
 NIL
-T
+NIL
 NIL
 NIL
 1
@@ -1495,7 +1547,7 @@ wAcc
 wAcc
 0.05
 1
-0.35
+0.75
 0.05
 1
 NIL
@@ -1510,6 +1562,47 @@ TEXTBOX
 11
 0.0
 1
+
+SLIDER
+5
+335
+130
+368
+evaporation-rate
+evaporation-rate
+0
+1
+0.9
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+135
+335
+230
+368
+dampT
+dampT
+0
+1
+0.15
+0.05
+1
+NIL
+HORIZONTAL
+
+INPUTBOX
+140
+485
+230
+545
+nFood-if-random
+0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1555,7 +1648,8 @@ The environment is setup by choosing a **food-scenario**, **land-type**, **borde
   * **wAcc** : terrain permeability projection weight
   * **nFood-if-random**: number of foodspots if _place food random_ is chosen
   * **keep-land?** : do you want to keep the land after pressing setup so you dont have to import/draw your land again for the next simulation?
-  * **dampT** (not shown in interface) : pheromone diffusion damping factor
+  * **dampT** : pheromone diffusion damping factor
+  * **evaporation-rate** : pheromone evaporation factor
   * **food-scenario** : scenario of how the food will be deployed
   * **land-type** : creates land in the environment 
   * **border-type** : creates a border in the environment
