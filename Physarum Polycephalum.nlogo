@@ -392,34 +392,32 @@ to add-food [ f-scenario ]
     create-food 1 [ give-food-attributes setxy -45 -6 set my-size 6 set size my-size ]
   ]
   if (f-scenario = "Zeeland") [ 
-    create-food 1 [ give-food-attributes setxy -33 -23 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 3 -85 set my-size 4 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -34 87 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 2 54 set my-size 7 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -34 -81 set my-size 8 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -118 8 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -73 -6 set my-size 10 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 7 120 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 64 99 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -50 69 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -8 -109 set my-size 4 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 128 90 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 91 -40 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 133 65 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -108 19 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 109 141 set my-size 7 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 87 21 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -114 -78 set my-size 4 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -84 -23 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 38 54 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 141 118 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 137 3 set my-size 12 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 91 -9 set my-size 11 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 32 -100 set my-size 4 set size my-size ]
-    create-food 1 [ give-food-attributes setxy -8 -14 set my-size 8 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 38 116 set my-size 6 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 75 71 set my-size 5 set size my-size ]
-    create-food 1 [ give-food-attributes setxy 58 130 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -97 -54 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 130 -3 set my-size 12 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -15 -82 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 135 89 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 12 -11 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 61 94 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -110 15 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 88 -24 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 70 131 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 78 10 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -28 -20 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 78 70 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -45 74 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -84 -25 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 135 66 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 139 127 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -74 -4 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -27 19 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 7 122 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 32 -27 set my-size 5 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 2 51 set my-size 7 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 98 28 set my-size 8 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 39 -93 set my-size 6 set size my-size ]
+    create-food 1 [ give-food-attributes setxy 100 144 set my-size 11 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -8 -9 set my-size 9 set size my-size ]
+    create-food 1 [ give-food-attributes setxy -54 20 set my-size 5 set size my-size ]
   ]
   if (f-scenario = "Zeeland 10 largest cities") [ 
     create-food 1 [ give-food-attributes setxy -74 -4 set my-size 8 set size my-size ]
@@ -933,7 +931,7 @@ TEXTBOX
 40
 1655
 371
-1-5%\n25-70\n25-70\n5-20\n5\n1,e-6 – 1,e-9 or 0\n1 patch\n1 patch\n0.5 - 50\n0.3 - 0.5\n0.3\n0.9\n
+1-5%\n25-70\n25-70\n5-20\n5\n1,e-6 – 1,e-9 or 0\n1 patch\n2 patches\n0.5 - 50\n0.3 - 0.8\n0.15\n0.9\n
 11
 0.0
 1
@@ -947,7 +945,7 @@ SA
 SA
 0
 90
-65
+55
 5
 1
 Degrees
@@ -1037,12 +1035,12 @@ NIL
 CHOOSER
 5
 430
-237
+230
 475
 food-scenario
 food-scenario
 "steiner triangle" "steiner square" "steiner rectangle" "place food random" "scenario 1" "scenario 2" "scenario 0" "England" "---------------------" "the Netherlands" "the Netherlands 10 largest cities" "the Netherlands province capitals" "Armenia" "Armenia 10 largest cities" "Armenia province capitals" "Zeeland" "Zeeland 10 largest cities" "Zeeland province capitals"
-17
+15
 
 SLIDER
 900
@@ -1053,7 +1051,7 @@ food-size
 food-size
 1
 25
-6
+5
 1
 1
 patches
@@ -1110,7 +1108,7 @@ frames-per-second
 frames-per-second
 0
 150
-60
+50
 10
 1
 fps
@@ -1191,7 +1189,7 @@ pencil-size
 pencil-size
 1
 100
-8
+21
 1
 1
 NIL
@@ -1246,7 +1244,7 @@ CHOOSER
 land-type
 land-type
 "No land" "Center lake" "Center mountain" "import land from CSV"
-3
+0
 
 BUTTON
 1005
@@ -1425,7 +1423,7 @@ CHOOSER
 wProj
 wProj
 0.0050 0.05 0.5 1 2 5 10 50
-3
+4
 
 CHOOSER
 115
