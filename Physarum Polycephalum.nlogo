@@ -1,8 +1,6 @@
 globals [ 
-  ; Jeff Jones'-variables 
   depT 
-  SS
-  
+  SS  
   mortality-rate
   
   ; 'toggle'-variables
@@ -128,7 +126,7 @@ to make-land
     ]
     [ set-border set-land ] ;else: border-type != CSV
   ]
-  set-land-variables ;allways
+  set-land-variables ;always
 end
   
 to-report get-coords
@@ -889,7 +887,7 @@ density
 density
 0
 20
-3
+2
 1
 1
 %
@@ -1040,7 +1038,7 @@ CHOOSER
 food-scenario
 food-scenario
 "steiner triangle" "steiner square" "steiner rectangle" "place food random" "scenario 1" "scenario 2" "scenario 0" "England" "---------------------" "the Netherlands" "the Netherlands 10 largest cities" "the Netherlands province capitals" "Armenia" "Armenia 10 largest cities" "Armenia province capitals" "Zeeland" "Zeeland 10 largest cities" "Zeeland province capitals"
-15
+0
 
 SLIDER
 900
@@ -1355,7 +1353,7 @@ SWITCH
 583
 keep-land
 keep-land
-0
+1
 1
 -1000
 
@@ -1618,6 +1616,12 @@ Food spots represent cities in transport networks and secrete a constant amount 
 ## HOW TO USE IT
 
 The items in the interface are grouped in the following way:
+  * Agent behaviour
+  * environment behaviour
+  * drawing tools
+  * testing & import/export tools
+  * view options
+  * Recording tool
 
 ### An agent operates as follows:
 Each agent occupies a single patch with its body. It has 3 antennae-like sensors of length **SO** (Sensory Offset), of which the outer two are placed at an angle **SA** (Sensory angle) relative to the heading of the ant. There is a sensor at the end of the antennae of size **SW x SW** (sensor width)  occupying exactly 1 patch. The agent is asked to rotate **RA** degrees (rotation angle) in the direction of the sensor with the highest value of pheromone and do a step of size **SS** (step size), if **pheromone-perceived > sMin** (sensitivity threshold) and if no other ant occupies that cell. 
@@ -1675,22 +1679,22 @@ Tools for working with the model efficiently are positioned at the right side of
 ####Recording tools
  * **start/stop record** : toggles recording of a movie. #ticks-recording = duration-in-minutes * frames-per-second. 
 
-## THINGS TO NOTICE
-
-(suggestjj234ed things for the user to notice while running the model)
-
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Experiment with the parameters in the interface. Use the typical values denoted at the right side of the model as guidelines to create interesting emergent behaviour
 
+Create your own countries with the drawing tools! You can import a .png file with "import drawing". Trace the border of your implemented country and import the colours and export it to a .csv file with "save land". You can import a once exported csv file when _import from CSV_ is selected as **land-type""
+
+create your own food scenarios with the **draw food** button and save it. Paste the executable code presented in the output window in the NetLogo code tab. You can start a simulation with your own food scenario when the name of the scenario is added to the _food-scenario_ chooser in the interface.
+ 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
+Branches appear to get trapped in dead ends in non-circular environments.  
+One could implement a three-dimensional notion of terrain: agents are slower when they walk uphill. Connections over hills are suspected to be avoided
 
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+Implementation of the model is designed by Sander van Dorsten. Work is based on the particle-based model described by Jeff Jones in his article "influences on the formation and evolution of Physarum Polycephalum inspired emergent transport networks"
 @#$#@#$#@
 default
 true
